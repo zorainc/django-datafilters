@@ -24,14 +24,22 @@ class FilterFormMixin(mixin_base):
 
     filter_form_cls = None
     use_filter_chaining = False
+    _filter_form = None
+
+    def get_filter_form(self):
+        if self._filter_form is None:
+            self.init_filterform()
+        return self._filter_form
+
+    def init_filterform(self):
+        self._filter_form = self.filter_form_cls(self.request.GET,
+                runtime_context=self.get_runtime_context(),
+                use_filter_chaining=self.use_filter_chaining)
 
     def get_context_data(self, **kwargs):
         context = kwargs
 
-        context['filterform'] = f = self.filter_form_cls(self.request.GET,
-                runtime_context=self.get_runtime_context(),
-                use_filter_chaining=self.use_filter_chaining)
-
+        context['filterform'] = f = self.get_filter_form()
         queryset = context['object_list']
 
         if f.is_valid():
