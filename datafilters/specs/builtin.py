@@ -41,8 +41,16 @@ class DateFieldFilterSpec(FilterSpec):
         super(DateFieldFilterSpec, self).__init__(field_name, **field_kwargs)
         self.is_datetime = is_datetime
         self.base_date_fun = base_date_fun
-        self.lookup_kwarg_since = '%s__gte' % self.field_name
-        self.lookup_kwarg_until = '%s__lt' % self.field_name
+
+        if isinstance(self.field_name, (tuple, list)):
+            since_field = self.field_name[0]
+            till_field = self.field_name[1]
+        else:
+            till_field = since_field = self.field_name
+
+
+        self.lookup_kwarg_since = '%s__gte' % till_field
+        self.lookup_kwarg_until = '%s__lt' % since_field
 
         self.filter_choices = {
             'all': lambda today, tomorrow: {},
