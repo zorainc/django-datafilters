@@ -32,7 +32,9 @@ class FilterFormMixin(mixin_base):
         return self._filter_form
 
     def init_filterform(self):
-        self._filter_form = self.filter_form_cls(self.request.GET,
+        if not self.filter_form_cls is None:
+            self._filter_form = self.filter_form_cls(
+                self.request.GET,
                 runtime_context=self.get_runtime_context(),
                 use_filter_chaining=self.use_filter_chaining)
 
@@ -40,9 +42,9 @@ class FilterFormMixin(mixin_base):
         context = kwargs
 
         context['filterform'] = f = self.get_filter_form()
-        queryset = context['object_list']
 
-        if f.is_valid():
+        if not f is None and f.is_valid():
+            queryset = context['object_list']
             context['object_list'] = f.filter(queryset).distinct()
 
         return super(FilterFormMixin, self).get_context_data(**kwargs)
