@@ -46,6 +46,11 @@ class FilterFormBase(forms.Form):
 
         self.runtime_context = kwargs.pop('runtime_context', {})
 
+        if data is None:
+            data = dict()
+        else:
+            data = data.copy()
+
         super(FilterFormBase, self).__init__(data=data, **kwargs)
 
         # Generate form fields
@@ -57,6 +62,11 @@ class FilterFormBase(forms.Form):
                 field_kwargs = self.default_fields_args.copy()
                 field_kwargs.update(local_field_kwargs)
                 self.fields[name] = field_cls(**field_kwargs)
+
+            if name in self.initial and not name in data:
+                # Force initial data value to be set in data, to prevent
+                # changed_data to be true when using inital data.
+                self.data[name] = self.initial[name]
 
         self.spec_count = len(self.filter_specs)
 
@@ -71,13 +81,16 @@ class FilterFormBase(forms.Form):
           * `extra_conditions`: a mapping to use as keyword arguments in
             `extra`.
         '''
+
         simple_lookups = []
         complex_conditions = []
         extra_conditions = []
         for name, spec in self.filter_specs.iteritems():
             raw_value = self.cleaned_data.get(name)
+
             if isinstance(spec, RuntimeAwareFilterSpecMixin):
-                lookup_or_condition = spec.to_lookup(raw_value, runtime_context=self.runtime_context)
+                lookup_or_condition = spec.to_lookup(
+                    raw_value, runtime_context=self.runtime_context)
             else:
                 lookup_or_condition = spec.to_lookup(raw_value)
 

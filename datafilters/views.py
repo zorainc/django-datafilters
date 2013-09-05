@@ -32,18 +32,20 @@ class FilterFormMixin(mixin_base):
         return self._filter_form
 
     def init_filterform(self):
-        self._filter_form = self.filter_form_cls(self.request.GET,
+        self._filter_form = self.filter_form_cls(
+            **self.get_filter_form_kwargs(
+                data=self.request.GET,
                 runtime_context=self.get_runtime_context(),
-                use_filter_chaining=self.use_filter_chaining)
+                use_filter_chaining=self.use_filter_chaining))
+
+    def get_filter_form_kwargs(self, **kwargs):
+        return kwargs
 
     def get_context_data(self, **kwargs):
-        context = kwargs
-
-        context['filterform'] = f = self.get_filter_form()
-        queryset = context['object_list']
+        kwargs['filterform'] = f = self.get_filter_form()
 
         if f.is_valid():
-            context['object_list'] = f.filter(queryset).distinct()
+            kwargs['object_list'] = f.filter(kwargs['object_list']).distinct()
 
         return super(FilterFormMixin, self).get_context_data(**kwargs)
 
