@@ -1,5 +1,5 @@
-from copy import deepcopy
 from django import forms
+from copy import deepcopy
 from django.db.models import Q
 
 from datafilters.filterspec import FilterSpec, RuntimeAwareFilterSpecMixin
