@@ -34,6 +34,36 @@ class FilterFormMixin(MultipleObjectMixin):
             self.init_filterform()
         return self._filter_form
 
+    def get_queryset(self):
+        """
+        Return queryset with filtering applied (if filter form passes
+        validation).
+        """
+        filter_form = self.get_filter_form()
+        if not filter_form is None and filter_form.is_valid():
+            return filter_form.filter(
+                super(FilterFormMixin, self).get_queryset()
+            ).distinct()
+        return super(FilterFormMixin, self).get_queryset()
+
+    def get_context_data(self, **kwargs):
+        """
+        Add filter form to the context.
+        """
+        kwargs[self.context_filterform_name] = self.get_filter_form()
+        return super(FilterFormMixin, self).get_context_data(**kwargs)
+
+    def get_runtime_context(self):
+        """
+        Get context for filter form to allow passing runtime information,
+        such as user, cookies, etc.
+
+        Method might be overriden by implementation and context returned by
+        this method will be accessible in to_lookup() method implementation
+        of FilterSpec.
+        """
+        return {'user': self.request.user}
+
     def init_filterform(self):
         """
         Initiates the filter form instance and set it as a instance attribute
@@ -47,39 +77,9 @@ class FilterFormMixin(MultipleObjectMixin):
                     use_filter_chaining=self.use_filter_chaining
                 ))
 
-    def get_context_data(self, **kwargs):
-        """
-        Add filter form to the context.
-        """
-        kwargs[self.context_filterform_name] = self.get_filter_form()
-        return super(FilterFormMixin, self).get_context_data(**kwargs)
-
     def get_filter_form_kwargs(self, **kwargs):
         """
         Provides a hook to override the initialisation kwargs of the
         filter form.
         """
         return kwargs
-
-    def get_queryset(self):
-        """
-        Return queryset with filtering applied (if filter form passes
-        validation).
-        """
-        filter_form = self.get_filter_form()
-        if not filter_form is None and filter_form.is_valid():
-            return filter_form.filter(
-                super(FilterFormMixin, self).get_queryset()
-            ).distinct()
-        return super(FilterFormMixin, self).get_queryset()
-
-    def get_runtime_context(self):
-        """
-        Get context for filter form to allow passing runtime information,
-        such as user, cookies, etc.
-
-        Method might be overriden by implementation and context returned by
-        this method will be accessible in to_lookup() method implementation
-        of FilterSpec.
-        """
-        return {'user': self.request.user}
