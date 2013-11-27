@@ -39,15 +39,16 @@ class FilterFormMixin(mixin_base):
                 use_filter_chaining=self.use_filter_chaining)
 
     def get_context_data(self, **kwargs):
-        context = kwargs
-
-        context['filterform'] = f = self.get_filter_form()
-
-        if not f is None and f.is_valid():
-            queryset = context['object_list']
-            context['object_list'] = f.filter(queryset).distinct()
-
+        kwargs.update(filterform=self.get_filter_form())
         return super(FilterFormMixin, self).get_context_data(**kwargs)
+
+    def get_queryset(self):
+        filter_form = self.get_filter_form()
+        if not filter_form is None and filter_form.is_valid():
+            return filter_form.filter(
+                super(FilterFormMixin, self).get_queryset()
+            ).distinct()
+        return super(FilterFormMixin, self).get_queryset()
 
     def get_runtime_context(self):
         return {'user': self.request.user}
