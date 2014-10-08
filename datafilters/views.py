@@ -25,6 +25,7 @@ class FilterFormMixin(MultipleObjectMixin):
     filter_form_cls = None
     use_filter_chaining = False
     context_filterform_name = 'filterform'
+    filter_distinct = True
 
     def get_filter_form(self):
         """
@@ -41,9 +42,12 @@ class FilterFormMixin(MultipleObjectMixin):
         """
         filter_form = self.get_filter_form()
         if not filter_form is None and filter_form.is_valid():
-            return filter_form.filter(
+            qs = filter_form.filter(
                 super(FilterFormMixin, self).get_queryset()
-            ).distinct()
+            )
+            if self.filter_distinct:
+                qs = qs.distinct()
+            return qs
         return super(FilterFormMixin, self).get_queryset()
 
     def get_context_data(self, **kwargs):
