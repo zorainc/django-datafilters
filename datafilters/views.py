@@ -45,7 +45,9 @@ class FilterFormMixin(MultipleObjectMixin):
             qs = filter_form.filter(
                 super(FilterFormMixin, self).get_queryset()
             )
-            if self.filter_distinct:
+            if self.filter_distinct and len(qs.query.join_map) > 1:
+                # No need to use distinct on all fields in case no join is
+                # performed.
                 qs = qs.distinct()
             return qs
         return super(FilterFormMixin, self).get_queryset()
