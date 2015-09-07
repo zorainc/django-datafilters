@@ -1,4 +1,4 @@
-from django.utils.datastructures import SortedDict
+from collections import OrderedDict
 
 __all__ = ('get_declared_fields', 'declarative_fields')
 
@@ -34,7 +34,7 @@ def get_declared_fields(bases, attrs, cls_filter,
             if hasattr(base, 'declared_fields'):
                 fields = base.declared_fields.items() + fields
 
-    return SortedDict(fields)
+    return OrderedDict(fields)
 
 
 def declarative_fields(cls_filter, meta_base=type, extra_attr_name='base_fields'):
