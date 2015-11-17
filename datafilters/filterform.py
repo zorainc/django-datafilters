@@ -65,7 +65,7 @@ class FilterFormBase(forms.Form):
 
             if name in self.initial and not name in data:
                 # Force initial data value to be set in data, to prevent
-                # changed_data to be true when using inital data.
+                # changed_data to be true when using initial data.
                 self.data[name] = self.initial[name]
 
         self.spec_count = len(self.filter_specs)
